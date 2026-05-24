@@ -17,7 +17,7 @@ export function CuisineFilter({ selected, onSelect }: CuisineFilterProps) {
             className={`whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
               selected === c
                 ? "bg-warm-gradient text-primary-foreground shadow-warm"
-                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                : "bg-primary/10 text-primary border border-primary/20 hover:bg-primary/15"
             }`}
           >
             {c}
