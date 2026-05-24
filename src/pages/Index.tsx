@@ -1,26 +1,25 @@
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ChefHat, Sparkles, Minus, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { IngredientInput } from "@/components/IngredientInput";
-import { RecipeCard } from "@/components/RecipeCard";
-import { RecipeDetail } from "@/components/RecipeDetail";
 import { CuisineFilter } from "@/components/CuisineFilter";
-import type { Ingredient, Recipe } from "@/lib/types";
+import { useMeal } from "@/context/MealContext";
 
 const Index = () => {
   const { toast } = useToast();
-  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [servings, setServings] = useState(2);
-  const [unitSystem, setUnitSystem] = useState<"metric" | "imperial">("metric");
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
-  const [cuisineFilter, setCuisineFilter] = useState("All");
-  const [loading, setLoading] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
+  const navigate = useNavigate();
+  const {
+    ingredients, setIngredients,
+    servings, setServings,
+    unitSystem, setUnitSystem,
+    cuisineFilter, setCuisineFilter,
+    setRecipes,
+    loading, setLoading,
+  } = useMeal();
 
-  const addIngredient = (ing: Ingredient) => setIngredients((prev) => [...prev, ing]);
+  const addIngredient = (ing: any) => setIngredients((prev) => [...prev, ing]);
   const removeIngredient = (id: string) => setIngredients((prev) => prev.filter((i) => i.id !== id));
 
   const generateRecipes = async () => {
@@ -28,12 +27,7 @@ const Index = () => {
       toast({ title: "Add ingredients first", description: "Tell us what you have in your kitchen!", variant: "destructive" });
       return;
     }
-
     setLoading(true);
-    setHasSearched(true);
-    setSelectedRecipe(null);
-    setRecipes([]);
-
     try {
       const { data, error } = await supabase.functions.invoke("generate-recipes", {
         body: {
@@ -42,14 +36,10 @@ const Index = () => {
           cuisineFilter: cuisineFilter !== "All" ? cuisineFilter : null,
         },
       });
-
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-
       setRecipes(data.recipes || []);
-      if ((data.recipes || []).length === 0) {
-        toast({ title: "No recipes found", description: "Try adding more ingredients or changing the cuisine filter." });
-      }
+      navigate("/recipes");
     } catch (e: any) {
       console.error(e);
       toast({ title: "Error", description: e.message || "Failed to generate recipes", variant: "destructive" });
@@ -58,118 +48,75 @@ const Index = () => {
     }
   };
 
-  const filteredRecipes = cuisineFilter === "All" ? recipes : recipes.filter((r) => r.cuisine === cuisineFilter);
-
-  // Recipe detail view
-  if (selectedRecipe) {
-    return (
-      <div className="min-h-screen bg-warm-gradient-subtle">
-        <div className="mx-auto max-w-md px-4 py-6">
-          <RecipeDetail recipe={selectedRecipe} onBack={() => setSelectedRecipe(null)} />
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-warm-gradient-subtle">
-      <div className="mx-auto max-w-md px-4 py-6 space-y-6">
+    <div className="h-screen overflow-hidden bg-warm-gradient-subtle flex flex-col">
+      <div className="mx-auto w-full max-w-md px-4 py-4 flex-1 flex flex-col gap-3 min-h-0">
         {/* Header */}
-        <div className="text-center space-y-1">
-          <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-warm-gradient shadow-warm mb-2">
-            <ChefHat className="h-6 w-6 text-primary-foreground" />
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center h-10 w-10 rounded-2xl bg-warm-gradient shadow-warm mb-1">
+            <ChefHat className="h-5 w-5 text-primary-foreground" />
           </div>
-          <h1 className="font-display text-2xl">MealCraft</h1>
-          <p className="text-sm text-muted-foreground">AI-powered recipes from your pantry</p>
+          <h1 className="font-display text-xl leading-tight">MealCraft</h1>
+          <p className="text-xs text-muted-foreground">AI-powered recipes from your pantry</p>
         </div>
 
-        {/* Ingredient input */}
-        <div>
-          <h2 className="font-display text-lg mb-3">Your Ingredients</h2>
-          <IngredientInput
-            ingredients={ingredients}
-            onAdd={addIngredient}
-            onRemove={removeIngredient}
-            unitSystem={unitSystem}
-            onUnitSystemChange={setUnitSystem}
-          />
+        {/* Ingredients (scrolls internally if many) */}
+        <div className="flex-1 flex flex-col min-h-0">
+          <h2 className="font-display text-sm mb-2">Your Ingredients</h2>
+          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+            <IngredientInput
+              ingredients={ingredients}
+              onAdd={addIngredient}
+              onRemove={removeIngredient}
+              unitSystem={unitSystem}
+              onUnitSystemChange={setUnitSystem}
+            />
+          </div>
         </div>
 
-        {/* Servings */}
-        <div>
-          <h2 className="font-display text-lg mb-3">Servings</h2>
-          <div className="flex items-center gap-4 rounded-lg bg-card p-3 shadow-card">
-            <button
-              onClick={() => setServings(Math.max(1, servings - 1))}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary hover:bg-secondary/80 transition-colors"
-            >
-              <Minus className="h-4 w-4" />
-            </button>
-            <div className="flex-1 text-center">
-              <span className="text-2xl font-bold">{servings}</span>
-              <span className="text-sm text-muted-foreground ml-2">{servings === 1 ? "person" : "people"}</span>
+        {/* Servings + Cuisine row */}
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <h2 className="font-display text-xs mb-1">Servings</h2>
+            <div className="flex items-center gap-2 rounded-lg bg-card p-2 shadow-card">
+              <button
+                onClick={() => setServings(Math.max(1, servings - 1))}
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary hover:bg-secondary/80"
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </button>
+              <div className="flex-1 text-center">
+                <span className="text-lg font-bold">{servings}</span>
+                <span className="text-xs text-muted-foreground ml-1">{servings === 1 ? "person" : "people"}</span>
+              </div>
+              <button
+                onClick={() => setServings(Math.min(20, servings + 1))}
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary hover:bg-secondary/80"
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </button>
             </div>
-            <button
-              onClick={() => setServings(Math.min(20, servings + 1))}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary hover:bg-secondary/80 transition-colors"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
           </div>
-        </div>
-
-        {/* Cuisine filter */}
-        <div>
-          <h2 className="font-display text-lg mb-3">Cuisine</h2>
-          <CuisineFilter selected={cuisineFilter} onSelect={setCuisineFilter} />
+          <div className="min-w-0">
+            <h2 className="font-display text-xs mb-1">Cuisine</h2>
+            <div className="rounded-lg bg-card p-1 shadow-card">
+              <CuisineFilter selected={cuisineFilter} onSelect={setCuisineFilter} />
+            </div>
+          </div>
         </div>
 
         {/* Generate button */}
         <Button
           onClick={generateRecipes}
           disabled={loading || ingredients.length === 0}
-          className="w-full h-12 text-base font-semibold bg-warm-gradient shadow-warm hover:opacity-90 transition-opacity"
+          className="w-full h-11 text-base font-semibold bg-warm-gradient shadow-warm hover:opacity-90"
         >
           {loading ? (
-            <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Finding recipes...
-            </>
+            <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Finding recipes...</>
           ) : (
-            <>
-              <Sparkles className="mr-2 h-5 w-5" />
-              Find Recipes with AI
-            </>
+            <><Sparkles className="mr-2 h-5 w-5" />Find Recipes with AI</>
           )}
         </Button>
-
-        {/* Results */}
-        {hasSearched && !loading && (
-          <div className="space-y-3">
-            <h2 className="font-display text-lg">
-              {filteredRecipes.length} {filteredRecipes.length === 1 ? "Recipe" : "Recipes"} Found
-            </h2>
-            {recipes.length > 0 && filteredRecipes.length === 0 && (
-              <p className="text-sm text-muted-foreground">No recipes match this cuisine. Try "All" to see all results.</p>
-            )}
-            {filteredRecipes.map((recipe, i) => (
-              <RecipeCard key={i} recipe={recipe} onSelect={setSelectedRecipe} />
-            ))}
-          </div>
-        )}
-
-        {/* Loading skeleton */}
-        {loading && (
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="rounded-xl bg-card p-4 shadow-card animate-pulse-warm" style={{ animationDelay: `${i * 200}ms` }}>
-                <div className="h-4 w-20 rounded bg-muted mb-2" />
-                <div className="h-5 w-3/4 rounded bg-muted mb-1" />
-                <div className="h-4 w-full rounded bg-muted" />
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
