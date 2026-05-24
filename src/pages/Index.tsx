@@ -74,35 +74,33 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Servings + Cuisine row */}
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <h2 className="font-display text-xs mb-1">Servings</h2>
-            <div className="flex items-center gap-2 rounded-lg bg-card p-2 shadow-card">
-              <button
-                onClick={() => setServings(Math.max(1, servings - 1))}
-                className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary hover:bg-secondary/80"
-              >
-                <Minus className="h-3.5 w-3.5" />
-              </button>
-              <div className="flex-1 text-center">
-                <span className="text-lg font-bold">{servings}</span>
-                <span className="text-xs text-muted-foreground ml-1">{servings === 1 ? "person" : "people"}</span>
-              </div>
-              <button
-                onClick={() => setServings(Math.min(20, servings + 1))}
-                className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary hover:bg-secondary/80"
-              >
-                <Plus className="h-3.5 w-3.5" />
-              </button>
+        {/* Servings */}
+        <div>
+          <h2 className="font-display text-xs mb-1">Servings</h2>
+          <div className="flex items-center gap-3 rounded-lg bg-card p-2 shadow-card">
+            <button
+              onClick={() => setServings(Math.max(1, servings - 1))}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary hover:bg-secondary/80"
+            >
+              <Minus className="h-4 w-4" />
+            </button>
+            <div className="flex-1 text-center">
+              <span className="text-lg font-bold">{servings}</span>
+              <span className="text-xs text-muted-foreground ml-1">{servings === 1 ? "person" : "people"}</span>
             </div>
+            <button
+              onClick={() => setServings(Math.min(20, servings + 1))}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary hover:bg-secondary/80"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
           </div>
-          <div className="min-w-0">
-            <h2 className="font-display text-xs mb-1">Cuisine</h2>
-            <div className="rounded-lg bg-card p-1 shadow-card">
-              <CuisineFilter selected={cuisineFilter} onSelect={setCuisineFilter} />
-            </div>
-          </div>
+        </div>
+
+        {/* Cuisine */}
+        <div>
+          <h2 className="font-display text-xs mb-1">Cuisine</h2>
+          <CuisineFilter selected={cuisineFilter} onSelect={setCuisineFilter} />
         </div>
 
         {/* Generate button */}
