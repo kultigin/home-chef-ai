@@ -1,9 +1,10 @@
-import { Clock, Users, AlertTriangle, ChevronRight, Flame } from "lucide-react";
+import { Clock, Users, AlertTriangle, ChevronRight, Flame, Globe2 } from "lucide-react";
 import type { Recipe } from "@/lib/types";
 
 interface RecipeCardProps {
   recipe: Recipe;
   onSelect: (recipe: Recipe) => void;
+  highlightCuisine?: boolean;
 }
 
 const difficultyColor: Record<string, string> = {
@@ -12,7 +13,7 @@ const difficultyColor: Record<string, string> = {
   Hard: "bg-destructive/20 text-destructive",
 };
 
-export function RecipeCard({ recipe, onSelect }: RecipeCardProps) {
+export function RecipeCard({ recipe, onSelect, highlightCuisine = false }: RecipeCardProps) {
   return (
     <button
       onClick={() => onSelect(recipe)}
@@ -21,7 +22,14 @@ export function RecipeCard({ recipe, onSelect }: RecipeCardProps) {
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="inline-block rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
+            <span
+              className={
+                highlightCuisine
+                  ? "inline-flex items-center gap-1 rounded-full bg-warm-gradient px-2.5 py-0.5 text-xs font-semibold text-primary-foreground shadow-warm"
+                  : "inline-block rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground"
+              }
+            >
+              {highlightCuisine && <Globe2 className="h-3 w-3" />}
               {recipe.cuisine}
             </span>
             <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${difficultyColor[recipe.difficulty] || ""}`}>

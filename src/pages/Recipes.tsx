@@ -29,7 +29,7 @@ const Recipes = () => {
         ) : (
           <div className="space-y-3">
             {filtered.map((recipe, i) => (
-              <RecipeCard key={i} recipe={recipe} onSelect={() => navigate(`/recipes/${i}`)} />
+              <RecipeCard key={i} recipe={recipe} highlightCuisine={cuisineFilter === "All"} onSelect={() => navigate(`/recipes/${i}`)} />
             ))}
             {filtered.length === 0 && (
               <p className="text-sm text-muted-foreground">No recipes match this cuisine.</p>
