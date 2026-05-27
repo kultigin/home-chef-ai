@@ -10,12 +10,31 @@ interface RecipeDetailProps {
 export function RecipeDetail({ recipe, onBack }: RecipeDetailProps) {
   return (
     <div className="animate-fade-in-up">
-      <button onClick={onBack} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
-        <ArrowLeft className="h-4 w-4" />
-        Back to recipes
-      </button>
+      {/* Full-width hero image */}
+      <div className="relative -mx-4 mb-4 h-56 overflow-hidden bg-secondary/60 sm:rounded-b-2xl">
+        {recipe.image ? (
+          <img src={recipe.image} alt={recipe.name} className="h-full w-full object-cover" />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            {recipe.imageLoading ? (
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+            ) : (
+              <div className="text-xs text-muted-foreground">No image</div>
+            )}
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
+        <button
+          onClick={onBack}
+          className="absolute top-3 left-3 flex items-center gap-1 rounded-full bg-background/80 backdrop-blur px-3 py-1.5 text-xs font-medium shadow-card hover:bg-background transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back
+        </button>
+      </div>
 
       <div className="space-y-5">
+
         {/* Header */}
         <div>
           <div className="flex items-center gap-2 mb-2">
