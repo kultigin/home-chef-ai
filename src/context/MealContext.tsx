@@ -27,6 +27,9 @@ export const MealProvider = ({ children }: { children: ReactNode }) => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const updateRecipe = (index: number, patch: Partial<Recipe>) =>
+    setRecipes((prev) => prev.map((r, i) => (i === index ? { ...r, ...patch } : r)));
+
   return (
     <MealContext.Provider
       value={{
@@ -34,7 +37,7 @@ export const MealProvider = ({ children }: { children: ReactNode }) => {
         servings, setServings,
         unitSystem, setUnitSystem,
         cuisineFilter, setCuisineFilter,
-        recipes, setRecipes,
+        recipes, setRecipes, updateRecipe,
         loading, setLoading,
       }}
     >
