@@ -65,9 +65,11 @@ serve(async (req) => {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
+        model: "openai/gpt-image-1-mini",
         prompt,
-        modalities: ["image", "text"],
+        size: "1024x1024",
+        quality: "low",
+        n: 1,
       }),
     });
 
@@ -88,7 +90,10 @@ serve(async (req) => {
 
     const data = await res.json();
     const b64 = data?.data?.[0]?.b64_json;
-    if (!b64) throw new Error("No image returned");
+    if (!b64) {
+      console.error("No image in response:", JSON.stringify(data).slice(0, 500));
+      throw new Error("No image returned");
+    }
 
     return new Response(JSON.stringify({ image: `data:image/png;base64,${b64}` }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
