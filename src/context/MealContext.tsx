@@ -12,6 +12,7 @@ interface MealContextType {
   setCuisineFilter: (s: string) => void;
   recipes: Recipe[];
   setRecipes: (r: Recipe[]) => void;
+  updateRecipe: (index: number, patch: Partial<Recipe>) => void;
   loading: boolean;
   setLoading: (l: boolean) => void;
 }
