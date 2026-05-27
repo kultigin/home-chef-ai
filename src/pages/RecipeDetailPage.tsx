@@ -5,10 +5,8 @@ import { useMeal } from "@/context/MealContext";
 const RecipeDetailPage = () => {
   const navigate = useNavigate();
   const { index } = useParams();
-  const { recipes, cuisineFilter } = useMeal();
-
-  const filtered = cuisineFilter === "All" ? recipes : recipes.filter((r) => r.cuisine === cuisineFilter);
-  const recipe = filtered[Number(index)];
+  const { recipes } = useMeal();
+  const recipe = recipes[Number(index)];
 
   return (
     <div className="min-h-screen bg-warm-gradient-subtle">
