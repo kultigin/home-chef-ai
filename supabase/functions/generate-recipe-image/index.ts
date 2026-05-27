@@ -90,7 +90,10 @@ serve(async (req) => {
 
     const data = await res.json();
     const b64 = data?.data?.[0]?.b64_json;
-    if (!b64) throw new Error("No image returned");
+    if (!b64) {
+      console.error("No image in response:", JSON.stringify(data).slice(0, 500));
+      throw new Error("No image returned");
+    }
 
     return new Response(JSON.stringify({ image: `data:image/png;base64,${b64}` }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
