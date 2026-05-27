@@ -18,6 +18,8 @@ export type Recipe = {
   missingOrShort: string[];
   ingredients: { name: string; amount: string; unit: string }[];
   steps: string[];
+  image?: string;
+  imageLoading?: boolean;
 };
 
 export const METRIC_UNITS = ["g", "kg", "ml", "L", "tsp", "tbsp", "pcs", "cups"];
